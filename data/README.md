@@ -16,11 +16,22 @@
 
 ## Gene Expression Clustering
 
-Gene expression and phenotypic file upload and figures of the clustering.
+Gene expression and phenotypic file upload, clustering settings and figures of the clustering results.
 
-## Clustering Results Table
 
-A downloadable CSV of the clustering results.
+## Transcriptional Age Analysis
+
+Transcriptional age analysis settings and figures of the results.
+
+
+## Phenotypic Comparison
+
+Phenotypic comparison settings and figures of the results.
+
+
+## Full Results Table
+
+A downloadable CSV of the clustering and transcriptional age results.
 
 ## Affiliations, Funding and Acknowledgements
 

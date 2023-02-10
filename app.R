@@ -13,22 +13,17 @@ library(shinythemes)
 library(RColorBrewer)
 library(markdown)
 library(shinycssloaders)
-library(DESeq2)
-library(data.table)
 library(MASS)
-library(ggplot2)
-library(dplyr)
 library(stringr)
-library(RNAAgeCalc)
-library(dplyr)
-library(ggplot2)
 library(ggpubr)
 library(rlang)
 library(shinybusy)
+library(DESeq2)
+library(RNAAgeCalc)
 
 columnToRowNames <- function(df, index) {
   rownames(df) <- df[, index]
-  df <- df[, -index]
+  df <- df[,-index]
   return(df)
 }
 
@@ -47,6 +42,11 @@ ui <- dashboardPage(
   dashboardSidebar(
     ## siderbar menu ####
     sidebarMenu(
+      menuItem(
+        "Tutorial & Example Datasets",
+        tabName = "exampleDataPage",
+        icon = icon("fas fa-file")
+      ),
       menuItem(
         "Gene Expression Clustering",
         tabName = "clusteringPage",
@@ -190,7 +190,7 @@ ui <- dashboardPage(
         sidebarPanel(
           selectInput(
             "phenotypicComparisonColumn",
-            "Select a Phenotypic Column to Compare Between Clusters",
+            "Select a Continous Column to Compare Between Clusters",
             NULL,
             selected = NULL,
             multiple = FALSE,
@@ -204,7 +204,7 @@ ui <- dashboardPage(
         sidebarPanel(
           selectInput(
             "phenotypicComparisonCovariants",
-            "Select Phenotypic Column(s) to Include as Covariants",
+            "Select Categorical Covariant(s)",
             NULL,
             selected = NULL,
             multiple = TRUE,
@@ -231,26 +231,29 @@ ui <- dashboardPage(
       br(),
       h2("Cluster Summary Statistic Table"),
       br(),
-      fluidRow(
-        column(
-          DT::dataTableOutput("clusterSummaryStatisticTable"),
-          width = 12
-        )
-      ),
+      fluidRow(column(
+        DT::dataTableOutput("clusterSummaryStatisticTable"),
+        width = 12
+      )),
       br(),
       h2("Pairwise Test Results Table"),
       br(),
-      fluidRow(
-        column(
-          DT::dataTableOutput("pairwiseTestResultsTable"),
-          width = 12
-        )
-      ),
+      fluidRow(column(
+        DT::dataTableOutput("pairwiseTestResultsTable"),
+        width = 12
+      )),
       br(),
       fluidRow(
-      downloadButton("downloadClusterSummaryStatisticTable", "Download Summary Stats"),
-      downloadButton("downloadPairwiseTestResultsTable", "Download Pairwise Results")
-    )),
+        downloadButton(
+          "downloadClusterSummaryStatisticTable",
+          "Download Summary Stats"
+        ),
+        downloadButton(
+          "downloadPairwiseTestResultsTable",
+          "Download Pairwise Results"
+        )
+      )
+    ),
     tabItem(
       tabName = "resultsPage",
       br(),
@@ -267,7 +270,22 @@ ui <- dashboardPage(
       downloadButton("downloadLdaResults", "Download")
     ),
     tabItem(tabName = "readme",
-            includeMarkdown("./data/README.md"))
+            includeMarkdown("./data/README.md")),
+    tabItem(
+      tabName = "exampleDataPage",
+      br(),
+      h2("Tutorial Video"),
+      br(),
+      HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/BM6fjephXiU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
+      h2("An Example Phenotypic File"),
+      br(),
+      downloadButton("downloadPFile", "Download Phenotypic File"),
+      br(),
+      br(),
+      h2("An Example Gene Expression File"),
+      br(),
+      downloadButton("downloadGEFile", "Download Gene Expression File")
+    )
   ))
 )
 
@@ -333,7 +351,7 @@ server <- function(input, output, session) {
           fread(geneExpressionFile$datapath) %>%
           as.data.frame() %>% columnToRowNames(1)
 
-        objects$geneExpressionDf[, order(colnames(objects$geneExpressionDf))]
+        objects$geneExpressionDf <- objects$geneExpressionDf[, order(colnames(objects$geneExpressionDf))]
       }
     }, error = function(e) {
       showNotification(
@@ -360,7 +378,7 @@ server <- function(input, output, session) {
         objects$phenotypicDf <- fread(phenotypicFile$datapath) %>%
           as.data.frame() %>% columnToRowNames(1)
 
-        objects$phenotypicDf[order(rownames(objects$phenotypicDf)), ]
+        objects$phenotypicDf <- objects$phenotypicDf[order(rownames(objects$phenotypicDf)),]
 
         columnNames <- colnames(objects$phenotypicDf)
 
@@ -399,7 +417,7 @@ server <- function(input, output, session) {
       # remove counts less than 10 in more than 5 individuals
       idx <-
         rowSums(counts(dds_genes, normalized = TRUE) >= 5) >= 10
-      dds_genes <- dds_genes[idx,]
+      dds_genes <- dds_genes[idx, ]
 
 
       # perform VSD stabilisation on whole matrix
@@ -414,9 +432,9 @@ server <- function(input, output, session) {
 
       # 2b. Find the intersection between brainbank_informative and the dataset and create subsets of the two datasets with these
       dataset_informative_shared <-
-        dataset_vsd[rownames(dataset_vsd) %in% rownames(brainbank_informative),]
+        dataset_vsd[rownames(dataset_vsd) %in% rownames(brainbank_informative), ]
       brainbank_informative_shared <-
-        brainbank_informative[rownames(brainbank_informative) %in% rownames(dataset_informative_shared),]
+        brainbank_informative[rownames(brainbank_informative) %in% rownames(dataset_informative_shared), ]
       brainbank_t <- data.frame(t(brainbank_informative))
 
 
@@ -689,19 +707,9 @@ server <- function(input, output, session) {
         objects$ldaResultsMachineFriendly[, phenotypicComparisonColumn]
       # whatever phenotype is chosen
 
-      columnsToExclude <-
-        c(
-          "LD1",
-          "LD2",
-          "ProbabilityofbeinginCluster1",
-          "ProbabilityofbeinginCluster2",
-          "ProbabilityofbeinginCluster3"#,
-          # "TranscriptionalAge", "TranscriptionalAgeAcceleration")
-        )
-
-
-      for (column in colnames(objects$ldaResultsMachineFriendly)) {
+      for (column in phenotypicComparisonCovariants) {
         if (!column %in% c(
+          "NA",
           "LD1",
           "LD2",
           "ProbabilityofbeinginCluster1",
@@ -737,10 +745,18 @@ server <- function(input, output, session) {
         ) %>%
         summarise(
           count = n(),
-          mean = mean((!!sym(phenotypicComparisonColumn)), na.rm = TRUE),
-          sd = sd((!!sym(phenotypicComparisonColumn)), na.rm = TRUE),
-          median = median((!!sym(phenotypicComparisonColumn)), na.rm = TRUE),
-          IQR = IQR((!!sym(phenotypicComparisonColumn)), na.rm = TRUE)
+          mean = mean((
+            !!sym(phenotypicComparisonColumn)
+          ), na.rm = TRUE),
+          sd = sd((
+            !!sym(phenotypicComparisonColumn)
+          ), na.rm = TRUE),
+          median = median((
+            !!sym(phenotypicComparisonColumn)
+          ), na.rm = TRUE),
+          IQR = IQR((
+            !!sym(phenotypicComparisonColumn)
+          ), na.rm = TRUE)
         ) %>% as.data.frame()
 
       colnames(objects$phenotypicComparisonSummaryResults)[1] <-
@@ -758,38 +774,49 @@ server <- function(input, output, session) {
       }
 
       # one-way ANOVA
-      equation <- "phenotypic_variable_transformed ~ objects$ldaResultsMachineFriendly$ClusterAssignment"
+      equation <-
+        "phenotypic_variable_transformed ~ objects$ldaResultsMachineFriendly$ClusterAssignment"
 
       covariantsFlag <- length(phenotypicComparisonCovariants) > 1
-      if(isFALSE(covariantsFlag)) {
+      if (isFALSE(covariantsFlag)) {
         covariantsFlag <- phenotypicComparisonCovariants != "NA"
       }
 
-      if(covariantsFlag) {
+      if (covariantsFlag) {
         for (covariant in phenotypicComparisonCovariants) {
           equation <- paste0(equation, " + ", covariant)
         }
       }
 
-      res <- aov(
-        as.formula(equation),
-        data = objects$ldaResultsMachineFriendly
-      )
+      res <- aov(as.formula(equation),
+                 data = objects$ldaResultsMachineFriendly)
 
       anova_p_value <- summary(res)[[1]][["Pr(>F)"]][1]
 
       # tukey's test
       pairwise_res <- TukeyHSD(res)
 
-      objects$phenotypicComparisonPairwiseResults <- as.data.frame(pairwise_res$`objects$ldaResultsMachineFriendly$ClusterAssignment`)
+      objects$phenotypicComparisonPairwiseResults <-
+        as.data.frame(pairwise_res$`objects$ldaResultsMachineFriendly$ClusterAssignment`)
 
-      tukey_p_values <- objects$phenotypicComparisonPairwiseResults[,4]
+      tukey_p_values <-
+        objects$phenotypicComparisonPairwiseResults[, 4]
 
-      columnNamesOrder <- colnames(objects$phenotypicComparisonPairwiseResults)
-      objects$phenotypicComparisonPairwiseResults$comparison <- rownames(objects$phenotypicComparisonPairwiseResults)
-      objects$phenotypicComparisonPairwiseResults <- objects$phenotypicComparisonPairwiseResults[,
-                                                                                                 c("comparison", columnNamesOrder)]
-      colnames(objects$phenotypicComparisonPairwiseResults) <- c("comparison", "difference", "lower confidence interval limit", "upper confidence interval limit", "adjusted p-value")
+      columnNamesOrder <-
+        colnames(objects$phenotypicComparisonPairwiseResults)
+      objects$phenotypicComparisonPairwiseResults$comparison <-
+        rownames(objects$phenotypicComparisonPairwiseResults)
+      objects$phenotypicComparisonPairwiseResults <-
+        objects$phenotypicComparisonPairwiseResults[,
+                                                    c("comparison", columnNamesOrder)]
+      colnames(objects$phenotypicComparisonPairwiseResults) <-
+        c(
+          "comparison",
+          "difference",
+          "lower confidence interval limit",
+          "upper confidence interval limit",
+          "adjusted p-value"
+        )
 
       tukey_first_group <- c("2", "3", "3")
       tukey_second_group <- c("1", "1", "2")
@@ -870,7 +897,7 @@ server <- function(input, output, session) {
       },
       content = function(con) {
         req(objects$ldaResults)
-        fwrite(objects$ldaResults, con)
+        fwrite(objects$ldaResults, con, row.names = TRUE)
       }
     )
   })
@@ -882,7 +909,9 @@ server <- function(input, output, session) {
       },
       content = function(con) {
         req(objects$ldaResults)
-        fwrite(objects$phenotypicComparisonSummaryResults, con)
+        fwrite(objects$phenotypicComparisonSummaryResults,
+               con,
+               row.names = TRUE)
       }
     )
   })
@@ -894,7 +923,32 @@ server <- function(input, output, session) {
       },
       content = function(con) {
         req(objects$ldaResults)
-        fwrite(objects$phenotypicComparisonPairwiseResults, con)
+        fwrite(objects$phenotypicComparisonPairwiseResults,
+               con,
+               row.names = TRUE)
+      }
+    )
+  })
+
+
+  output$downloadGEFile <- try({
+    downloadHandler(
+      filename = function() {
+        'geneExpressionFile.csv'
+      },
+      content = function(con) {
+        fwrite(fread("data/expressionData.csv"), con)
+      }
+    )
+  })
+
+  output$downloadPFile <- try({
+    downloadHandler(
+      filename = function() {
+        'phenotypicFile.csv'
+      },
+      content = function(con) {
+        fwrite(fread("data/phenotypicData.csv"), con)
       }
     )
   })

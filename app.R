@@ -23,7 +23,7 @@ library(RNAAgeCalc)
 
 columnToRowNames <- function(df, index) {
   rownames(df) <- df[, index]
-  df <- df[,-index]
+  df <- df[, -index]
   return(df)
 }
 
@@ -71,222 +71,226 @@ ui <- dashboardPage(
     )
   ),
   ## dashboardBody ####
-  dashboardBody(tabItems(
-    tabItem(
-      tabName = "clusteringPage",
-      add_busy_spinner(spin = "fading-circle"),
-      fluidRow(
-        br(),
-        # Sidebar panel for inputs #####################################################
-        sidebarPanel(
-          # File upload for gene expression data
-          fileInput(inputId = "geneExpressionFile",
-                    label = "Upload Raw Gene Counts File with Ensembl IDs"),
+  dashboardBody(
+    tabItems(
+      tabItem(
+        tabName = "clusteringPage",
+        add_busy_spinner(spin = "fading-circle"),
+        fluidRow(
           br(),
-          actionButton("clusteringButton", "Perform Clustering")
-        ),
-        sidebarPanel(
-          fileInput(inputId = "phenotypicFile",
-                    label = "Upload Phenotypic File")
-        ),
-
-        sidebarPanel(
-          selectInput(
-            "phenotypicColumn",
-            "Select a Phenotypic Column",
-            NULL,
-            selected = NULL,
-            multiple = FALSE,
-            selectize = TRUE,
-            width = NULL,
-            size = NULL
-          )
-        )
-      ),
-      box(
-        width = "105%",
-        height = "105%",
-        status = "primary",
-        solidHeader = TRUE,
-        title = "Linear Discriminant Analysis Plot",
-        #withSpinner(
-        plotlyOutput(
-          "ldaPlot",
-          width = "100%",
-          height = "600px",
-          inline = TRUE
-        )
-        #)
-      )
-    ),
-    tabItem(
-      tabName = "transcriptionalAgePage",
-      add_busy_spinner(spin = "fading-circle"),
-      fluidRow(
-        br(),
-        # Sidebar panel for inputs #####################################################
-        sidebarPanel(
-          # File upload for gene expression data
-          selectInput(
-            "tissue_type",
-            "Select the Tissue Type",
-            c("brain", "blood", "muscle", "nerve"),
-            selected = "brain",
-            multiple = FALSE,
-            selectize = TRUE,
-            width = NULL,
-            size = NULL
+          # Sidebar panel for inputs #####################################################
+          sidebarPanel(
+            # File upload for gene expression data
+            fileInput(inputId = "geneExpressionFile",
+                      label = "Upload Raw Gene Counts File with Ensembl IDs"),
+            br(),
+            actionButton("clusteringButton", "Perform Clustering")
           ),
-          br(),
-          actionButton("transcriptionalAgeButton", "Perform Analysis")
-
-        ),
-        sidebarPanel(
-          selectInput(
-            "population",
-            "Select the Population Type",
-            c("All Races", "North European/European"),
-            selected = "All Races",
-            multiple = FALSE,
-            selectize = TRUE,
-            width = NULL,
-            size = NULL
-          )
-        ),
-        sidebarPanel(
-          selectInput(
-            "age_column",
-            "Select the Age Column",
-            NULL,
-            selected = NULL,
-            multiple = FALSE,
-            selectize = TRUE,
-            width = NULL,
-            size = NULL
-          )
-        )
-      ),
-      box(
-        width = "105%",
-        height = "105%",
-        status = "primary",
-        solidHeader = TRUE,
-        title = "Transcriptional Analysis Plot",
-        #withSpinner(
-        plotlyOutput(
-          "taPlot",
-          width = "100%",
-          height = "600px",
-          inline = TRUE
-        )
-        #)
-      )
-    ),
-    tabItem(
-      tabName = "phenotypicComparisonPage",
-      add_busy_spinner(spin = "fading-circle"),
-      fluidRow(
-        br(),
-        sidebarPanel(
-          selectInput(
-            "phenotypicComparisonColumn",
-            "Select a Continous Column to Compare Between Clusters",
-            NULL,
-            selected = NULL,
-            multiple = FALSE,
-            selectize = TRUE,
-            width = NULL,
-            size = NULL
+          sidebarPanel(
+            fileInput(inputId = "phenotypicFile",
+                      label = "Upload Phenotypic File")
           ),
-          br(),
-          actionButton("phenotypicComparisonButton", "Perform Analysis")
+
+          sidebarPanel(
+            selectInput(
+              "phenotypicColumn",
+              "Select a Phenotypic Column",
+              NULL,
+              selected = NULL,
+              multiple = FALSE,
+              selectize = TRUE,
+              width = NULL,
+              size = NULL
+            )
+          )
         ),
-        sidebarPanel(
-          selectInput(
-            "phenotypicComparisonCovariants",
-            "Select Categorical Covariant(s)",
-            NULL,
-            selected = NULL,
-            multiple = TRUE,
-            selectize = TRUE,
-            width = NULL,
-            size = NULL
+        box(
+          width = "105%",
+          height = "105%",
+          status = "primary",
+          solidHeader = TRUE,
+          title = "Linear Discriminant Analysis Plot",
+          #withSpinner(
+          plotlyOutput(
+            "ldaPlot",
+            width = "100%",
+            height = "600px",
+            inline = TRUE
+          )
+          #)
+        )
+      ),
+      tabItem(
+        tabName = "transcriptionalAgePage",
+        add_busy_spinner(spin = "fading-circle"),
+        fluidRow(
+          br(),
+          # Sidebar panel for inputs #####################################################
+          sidebarPanel(
+            # File upload for gene expression data
+            selectInput(
+              "tissue_type",
+              "Select the Tissue Type",
+              c("brain", "blood", "muscle", "nerve"),
+              selected = "brain",
+              multiple = FALSE,
+              selectize = TRUE,
+              width = NULL,
+              size = NULL
+            ),
+            br(),
+            actionButton("transcriptionalAgeButton", "Perform Analysis")
+
+          ),
+          sidebarPanel(
+            selectInput(
+              "population",
+              "Select the Population Type",
+              c("All Races", "North European/European"),
+              selected = "All Races",
+              multiple = FALSE,
+              selectize = TRUE,
+              width = NULL,
+              size = NULL
+            )
+          ),
+          sidebarPanel(
+            selectInput(
+              "age_column",
+              "Select the Age Column",
+              NULL,
+              selected = NULL,
+              multiple = FALSE,
+              selectize = TRUE,
+              width = NULL,
+              size = NULL
+            )
+          )
+        ),
+        box(
+          width = "105%",
+          height = "105%",
+          status = "primary",
+          solidHeader = TRUE,
+          title = "Transcriptional Analysis Plot",
+          #withSpinner(
+          plotlyOutput(
+            "taPlot",
+            width = "100%",
+            height = "600px",
+            inline = TRUE
+          )
+          #)
+        )
+      ),
+      tabItem(
+        tabName = "phenotypicComparisonPage",
+        add_busy_spinner(spin = "fading-circle"),
+        fluidRow(
+          br(),
+          sidebarPanel(
+            selectInput(
+              "phenotypicComparisonColumn",
+              "Select a Continous Column to Compare Between Clusters",
+              NULL,
+              selected = NULL,
+              multiple = FALSE,
+              selectize = TRUE,
+              width = NULL,
+              size = NULL
+            ),
+            br(),
+            actionButton("phenotypicComparisonButton", "Perform Analysis")
+          ),
+          sidebarPanel(
+            selectInput(
+              "phenotypicComparisonCovariants",
+              "Select Categorical Covariant(s)",
+              NULL,
+              selected = NULL,
+              multiple = TRUE,
+              selectize = TRUE,
+              width = NULL,
+              size = NULL
+            )
+          )
+        ),
+        box(
+          width = "105%",
+          height = "105%",
+          status = "primary",
+          solidHeader = TRUE,
+          title = "Phenotypic Comparison Plot",
+          #withSpinner(
+          plotlyOutput(
+            "pcPlot",
+            width = "100%",
+            height = "600px",
+            inline = TRUE
+          )
+        ),
+        br(),
+        h2("Cluster Summary Statistic Table"),
+        br(),
+        fluidRow(column(
+          DT::dataTableOutput("clusterSummaryStatisticTable"),
+          width = 12
+        )),
+        br(),
+        h2("Pairwise Test Results Table"),
+        br(),
+        fluidRow(column(
+          DT::dataTableOutput("pairwiseTestResultsTable"),
+          width = 12
+        )),
+        br(),
+        fluidRow(
+          downloadButton(
+            "downloadClusterSummaryStatisticTable",
+            "Download Summary Stats"
+          ),
+          downloadButton(
+            "downloadPairwiseTestResultsTable",
+            "Download Pairwise Results"
           )
         )
       ),
-      box(
-        width = "105%",
-        height = "105%",
-        status = "primary",
-        solidHeader = TRUE,
-        title = "Phenotypic Comparison Plot",
-        #withSpinner(
-        plotlyOutput(
-          "pcPlot",
-          width = "100%",
-          height = "600px",
-          inline = TRUE
-        )
-      ),
-      br(),
-      h2("Cluster Summary Statistic Table"),
-      br(),
-      fluidRow(column(
-        DT::dataTableOutput("clusterSummaryStatisticTable"),
-        width = 12
-      )),
-      br(),
-      h2("Pairwise Test Results Table"),
-      br(),
-      fluidRow(column(
-        DT::dataTableOutput("pairwiseTestResultsTable"),
-        width = 12
-      )),
-      br(),
-      fluidRow(
-        downloadButton(
-          "downloadClusterSummaryStatisticTable",
-          "Download Summary Stats"
+      tabItem(
+        tabName = "resultsPage",
+        br(),
+        h2("Full Table of Clustering Results"),
+        br(),
+        fluidRow(
+          column(
+            DT::dataTableOutput("fulltable"),
+            width = 12,
+            style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
+          )
         ),
-        downloadButton(
-          "downloadPairwiseTestResultsTable",
-          "Download Pairwise Results"
-        )
-      )
-    ),
-    tabItem(
-      tabName = "resultsPage",
-      br(),
-      h2("Full Table of Clustering Results"),
-      br(),
-      fluidRow(
-        column(
-          DT::dataTableOutput("fulltable"),
-          width = 12,
-          style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
-        )
+        br(),
+        downloadButton("downloadLdaResults", "Download")
       ),
-      br(),
-      downloadButton("downloadLdaResults", "Download")
-    ),
-    tabItem(tabName = "readme",
-            includeMarkdown("./data/README.md")),
-    tabItem(
-      tabName = "exampleDataPage",
-      br(),
-      h2("Tutorial Video"),
-      br(),
-      HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/BM6fjephXiU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-      h2("An Example Phenotypic File"),
-      br(),
-      downloadButton("downloadPFile", "Download Phenotypic File"),
-      br(),
-      br(),
-      h2("An Example Gene Expression File"),
-      br(),
-      downloadButton("downloadGEFile", "Download Gene Expression File")
+      tabItem(tabName = "readme",
+              includeMarkdown("./data/README.md")),
+      tabItem(
+        tabName = "exampleDataPage",
+        br(),
+        h2("Tutorial Video"),
+        br(),
+        HTML(
+          '<iframe width="560" height="315" src="https://www.youtube.com/embed/BM6fjephXiU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+        ),
+        h2("An Example Phenotypic File"),
+        br(),
+        downloadButton("downloadPFile", "Download Phenotypic File"),
+        br(),
+        br(),
+        h2("An Example Gene Expression File"),
+        br(),
+        downloadButton("downloadGEFile", "Download Gene Expression File")
+      )
     )
-  ))
+  )
 )
 
 # server ####
@@ -351,7 +355,8 @@ server <- function(input, output, session) {
           fread(geneExpressionFile$datapath) %>%
           as.data.frame() %>% columnToRowNames(1)
 
-        objects$geneExpressionDf <- objects$geneExpressionDf[, order(colnames(objects$geneExpressionDf))]
+        objects$geneExpressionDf <-
+          objects$geneExpressionDf[, order(colnames(objects$geneExpressionDf))]
       }
     }, error = function(e) {
       showNotification(
@@ -378,7 +383,8 @@ server <- function(input, output, session) {
         objects$phenotypicDf <- fread(phenotypicFile$datapath) %>%
           as.data.frame() %>% columnToRowNames(1)
 
-        objects$phenotypicDf <- objects$phenotypicDf[order(rownames(objects$phenotypicDf)),]
+        objects$phenotypicDf <-
+          objects$phenotypicDf[order(rownames(objects$phenotypicDf)), ]
 
         columnNames <- colnames(objects$phenotypicDf)
 
@@ -417,7 +423,7 @@ server <- function(input, output, session) {
       # remove counts less than 10 in more than 5 individuals
       idx <-
         rowSums(counts(dds_genes, normalized = TRUE) >= 5) >= 10
-      dds_genes <- dds_genes[idx, ]
+      dds_genes <- dds_genes[idx,]
 
 
       # perform VSD stabilisation on whole matrix
@@ -432,9 +438,9 @@ server <- function(input, output, session) {
 
       # 2b. Find the intersection between brainbank_informative and the dataset and create subsets of the two datasets with these
       dataset_informative_shared <-
-        dataset_vsd[rownames(dataset_vsd) %in% rownames(brainbank_informative), ]
+        dataset_vsd[rownames(dataset_vsd) %in% rownames(brainbank_informative),]
       brainbank_informative_shared <-
-        brainbank_informative[rownames(brainbank_informative) %in% rownames(dataset_informative_shared), ]
+        brainbank_informative[rownames(brainbank_informative) %in% rownames(dataset_informative_shared),]
       brainbank_t <- data.frame(t(brainbank_informative))
 
 
@@ -447,6 +453,16 @@ server <- function(input, output, session) {
       # extract number of informative genes as a variable
       informative_gene_no <-
         length(rownames(dataset_informative_shared))
+
+      showNotification(paste0(
+        informative_gene_no,
+        ' genes were used in the clustering model (',
+        signif(informative_gene_no / nrow(brainbank_informative) * 100, 3),
+        '%)'
+      ),
+      type = "message",
+      duration = 30
+      )
 
       # train an LDA model using BrainBank data and cluster assignments
       brainbank_LDA[1:informative_gene_no] <-

@@ -205,7 +205,7 @@ ui <- dashboardPage(
           sidebarPanel(
             selectInput(
               "phenotypicComparisonCovariants",
-              "Select Categorical Covariant(s)",
+              "Select Categorical Covariate(s)",
               NULL,
               selected = NULL,
               multiple = TRUE,
@@ -317,7 +317,7 @@ server <- function(input, output, session) {
 
     updateSelectInput(session,
                       "phenotypicComparisonColumn",
-                      choices = c(columnNames))
+                      choices = columnNames)
 
     updateSelectInput(
       session,
@@ -827,10 +827,10 @@ server <- function(input, output, session) {
                                                     c("comparison", columnNamesOrder)]
       colnames(objects$phenotypicComparisonPairwiseResults) <-
         c(
-          "comparison",
+          "comparison (comparison group vs reference group)",
           "difference",
-          "lower confidence interval limit",
-          "upper confidence interval limit",
+          "lower confidence interval limit (95%)",
+          "upper confidence interval limit (95%)",
           "adjusted p-value"
         )
 
